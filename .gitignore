@@ -11,8 +11,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-import 'package:philosopher_ai/config.dart';
-
+lib/config.dart
 
 # IntelliJ related
 *.iml

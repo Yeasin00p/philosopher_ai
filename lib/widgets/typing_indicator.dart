@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-/// Animated three-dot "thinking" indicator styled as the philosopher pondering.
 class TypingIndicator extends StatefulWidget {
   const TypingIndicator({super.key});
 

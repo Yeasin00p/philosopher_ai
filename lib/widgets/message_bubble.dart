@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/chat_message.dart';
 import '../theme/app_theme.dart';
 
-/// A single chat bubble — styled differently for user vs philosopher.
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
 

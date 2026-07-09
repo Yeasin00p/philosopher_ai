@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-/// Animated pulsing gold dot to indicate the philosopher is "online."
 class PhilosopherAvatar extends StatefulWidget {
   final double size;
   final bool showOnlineIndicator;

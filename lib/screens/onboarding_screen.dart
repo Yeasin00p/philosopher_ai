@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import 'chat_screen.dart';
 
-/// Onboarding flow with 2 intro pages + navigation dots + CTA.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -39,7 +38,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Skip button
             Align(
               alignment: Alignment.topRight,
               child: Padding(
@@ -58,7 +56,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-            // Pages
+            
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -70,7 +68,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-            // Dots + action
             Padding(
               padding: const EdgeInsets.only(bottom: 40, left: 32, right: 32),
               child: Row(
@@ -95,7 +92,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     }),
                   ),
 
-                  // Next / Begin button
                   GestureDetector(
                     onTap: () {
                       if (_currentPage == 0) {
@@ -158,7 +154,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-/// Intro page 1: "The Philosopher Awaits" — large portrait + title.
 class _IntroPage1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -190,7 +185,6 @@ class _IntroPage1 extends StatelessWidget {
 
           const SizedBox(height: 44),
 
-          // Title
           Text(
             'The Philosopher\nAwaits',
             textAlign: TextAlign.center,
@@ -199,7 +193,6 @@ class _IntroPage1 extends StatelessWidget {
 
           const SizedBox(height: 18),
 
-          // Gold divider
           Container(
             width: 36,
             height: 1.5,
@@ -211,7 +204,6 @@ class _IntroPage1 extends StatelessWidget {
 
           const SizedBox(height: 18),
 
-          // Description
           Text(
             'Step into a timeless dialogue with Marcus Aurelius — '
             'Roman Emperor, Stoic sage, and author of the Meditations. '
@@ -228,7 +220,6 @@ class _IntroPage1 extends StatelessWidget {
   }
 }
 
-/// Intro page 2: "What to Expect" — 3 feature cards.
 class _IntroPage2 extends StatelessWidget {
   final VoidCallback onBegin;
 

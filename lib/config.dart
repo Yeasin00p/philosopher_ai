@@ -1,6 +1,4 @@
-/// App configuration.
-/// Replace [geminiApiKey] with your actual Gemini API key from:
-/// https://aistudio.google.com/app/apikey
+
 class AppConfig {
-  static const String geminiApiKey = 'AQ.Ab8RN6IrLTCW2fctmueVy3PyT4sdGJ079h9cJe3-_XBSSFJPCQ';
+  static const String gorqApiKey = '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';
 }

@@ -1,4 +1,3 @@
-/// Represents a single chat message in the conversation.
 class ChatMessage {
   final String text;
   final bool isUser;

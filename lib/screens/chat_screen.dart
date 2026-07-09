@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/chat_message.dart';
-import '../services/gemini_service.dart';
+import '../services/gorq_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/philosopher_avatar.dart';
 import '../widgets/typing_indicator.dart';
 
-/// The main chat experience — the user converses with Marcus Aurelius.
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
@@ -20,10 +19,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   final List<ChatMessage> _messages = [];
-  final GeminiService _gemini = GeminiService();
+  final GroqService _groq = GroqService();
 
   bool _isTyping = false;
   bool _isLoading = true;
+  bool _hasText = false;
+  String? _lastFailedText;
   late AnimationController _headerFade;
 
   @override
@@ -33,13 +34,26 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 600),
     )..forward();
+    _textController.addListener(() {
+      final hasText = _textController.text.trim().isNotEmpty;
+      if (hasText != _hasText) {
+        setState(() => _hasText = hasText);
+      }
+    });
     _loadGreeting();
+  }
+
+  String _friendlyErrorMessage(Object e) {
+    if (e is NetworkException || e is ApiException) {
+      return e.toString();
+    }
+    return 'ক্ষমা করো — এই মুহূর্তে আমার চিন্তা মেঘাচ্ছন্ন। হয়তো আবার চেষ্টা করো।';
   }
 
   Future<void> _loadGreeting() async {
     setState(() => _isTyping = true);
     try {
-      final greeting = await _gemini.getGreeting();
+      final greeting = await _groq.getGreeting();
       if (mounted) {
         setState(() {
           _messages.add(ChatMessage(
@@ -66,11 +80,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _sendMessage() async {
-    final text = _textController.text.trim();
+  Future<void> _sendMessage([String? retryText]) async {
+    final text = retryText ?? _textController.text.trim();
     if (text.isEmpty || _isTyping) return;
 
-    _textController.clear();
+    _lastFailedText = null;
+    if (retryText == null) _textController.clear();
+
     setState(() {
       _messages.add(ChatMessage(
         text: text,
@@ -82,7 +98,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _scrollToBottom();
 
     try {
-      final response = await _gemini.sendMessage(text);
+      final response = await _groq.sendMessage(text);
       if (mounted) {
         setState(() {
           _messages.add(ChatMessage(
@@ -97,8 +113,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     } catch (e) {
       if (mounted) {
         setState(() {
+          _lastFailedText = text;
           _messages.add(ChatMessage(
-            text: 'ক্ষমা করো — এই মুহূর্তে আমার চিন্তা মেঘাচ্ছন্ন। হয়তো আবার চেষ্টা করো।',
+            text: _friendlyErrorMessage(e),
             isUser: false,
             timestamp: DateTime.now(),
           ));
@@ -106,6 +123,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         });
         _scrollToBottom();
       }
+    }
+  }
+
+  void _retryLastMessage() {
+    if (_lastFailedText != null) {
+      _sendMessage(_lastFailedText);
     }
   }
 
@@ -126,6 +149,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _textController.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
+    _groq.dispose();
     _headerFade.dispose();
     super.dispose();
   }
@@ -136,13 +160,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       backgroundColor: AppColors.obsidian,
       body: Column(
         children: [
-          // -- Header bar --
           _buildHeader(context),
 
-          // -- Divider --
           Container(height: 1, color: AppColors.divider),
 
-          // -- Messages list --
           Expanded(
             child: _isLoading
                 ? _buildLoadingState()
@@ -159,8 +180,44 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   ),
           ),
 
-          // -- Input bar --
+          if (_lastFailedText != null) _buildRetryBanner(),
+
           _buildInputBar(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRetryBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: AppColors.navy,
+      child: Row(
+        children: [
+          Icon(Icons.error_outline_rounded,
+              color: AppColors.gold.withValues(alpha: 0.8), size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'বার্তাটি পাঠানো যায়নি।',
+              style: GoogleFonts.inter(
+                color: AppColors.parchment.withValues(alpha: 0.75),
+                fontSize: 12.5,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: _retryLastMessage,
+            child: Text(
+              'আবার চেষ্টা করুন',
+              style: GoogleFonts.inter(
+                color: AppColors.gold,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -326,14 +383,14 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
           // Send button
           GestureDetector(
-            onTap: _sendMessage,
+            onTap: (_hasText && !_isTyping) ? () => _sendMessage() : null,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               width: 48,
               height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _textController.text.trim().isNotEmpty
+                color: (_hasText && !_isTyping)
                     ? AppColors.gold
                     : AppColors.gold.withValues(alpha: 0.12),
                 border: Border.all(
@@ -341,7 +398,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   width: 1,
                 ),
                 boxShadow: [
-                  if (_textController.text.trim().isNotEmpty)
+                  if (_hasText && !_isTyping)
                     BoxShadow(
                       color: AppColors.gold.withValues(alpha: 0.25),
                       blurRadius: 12,
@@ -351,7 +408,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               ),
               child: Icon(
                 Icons.arrow_upward_rounded,
-                color: _textController.text.trim().isNotEmpty
+                color: (_hasText && !_isTyping)
                     ? AppColors.obsidian
                     : AppColors.gold.withValues(alpha: 0.4),
                 size: 22,

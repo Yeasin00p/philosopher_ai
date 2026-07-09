@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import 'onboarding_screen.dart';
 
-/// Cinematic splash screen with animated logo and tagline.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -84,7 +83,6 @@ class _SplashScreenState extends State<SplashScreen>
         builder: (context, _) {
           return Stack(
             children: [
-              // Radial gold glow
               Center(
                 child: Container(
                   width: 350,
@@ -108,7 +106,6 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Icon
                     Opacity(
                       opacity: _fadeIn.value,
                       child: Transform.translate(
@@ -134,7 +131,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                     const SizedBox(height: 28),
 
-                    // App name
                     Opacity(
                       opacity: _fadeIn.value,
                       child: Transform.translate(
@@ -155,7 +151,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                     const SizedBox(height: 14),
 
-                    // Divider line
                     Opacity(
                       opacity: _taglineFade.value,
                       child: Container(
@@ -167,7 +162,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                     const SizedBox(height: 14),
 
-                    // Tagline
                     Opacity(
                       opacity: _taglineFade.value,
                       child: Text(

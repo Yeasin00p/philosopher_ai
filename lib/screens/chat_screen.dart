@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/chat_message.dart';
-import '../services/gorq_service.dart';
+import '../services/marcus_chat_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/philosopher_avatar.dart';
@@ -19,7 +19,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   final List<ChatMessage> _messages = [];
-  final GroqService _groq = GroqService();
+  final MarcusChatService _groq = MarcusChatService();
 
   bool _isTyping = false;
   bool _isLoading = true;

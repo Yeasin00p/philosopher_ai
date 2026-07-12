@@ -1,10 +1,6 @@
 import 'character_memory.dart';
 import 'marcus_prompt.dart';
 
-/// Assembles the final `messages` array sent to the API: base persona +
-/// a short character-memory brief + the raw turn history. Kept separate
-/// so prompt structure can change without touching the API client or
-/// history management.
 class PromptBuilder {
   const PromptBuilder();
 

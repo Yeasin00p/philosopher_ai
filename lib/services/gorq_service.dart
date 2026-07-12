@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:philosopher_ai/config.dart';
+import 'session_id_service.dart';
 
 class NetworkException implements Exception {
   final String message;
@@ -14,7 +15,16 @@ class NetworkException implements Exception {
 class ApiException implements Exception {
   final String message;
   final int? statusCode;
-  ApiException(this.message, {this.statusCode});
+  final bool isUsageLimit;
+  final DateTime? resetsAt;
+
+  ApiException(
+    this.message, {
+    this.statusCode,
+    this.isUsageLimit = false,
+    this.resetsAt,
+  });
+
   @override
   String toString() => message;
 }
@@ -51,7 +61,9 @@ class GroqService {
       try {
         return await attempt();
       } on ApiException catch (e) {
-        final retryable = e.statusCode == 429 || (e.statusCode ?? 0) >= 500;
+        final retryable =
+            !e.isUsageLimit &&
+            (e.statusCode == 429 || (e.statusCode ?? 0) >= 500);
         if (!retryable || tries >= _maxRetries) rethrow;
       } on NetworkException {
         if (tries >= _maxRetries) rethrow;
@@ -67,6 +79,8 @@ class GroqService {
     required double topP,
     required int maxTokens,
   }) async {
+    final sessionId = await SessionIdService.instance.getOrCreate();
+
     http.Response response;
     try {
       response = await _client
@@ -74,6 +88,7 @@ class GroqService {
             Uri.parse(_baseUrl),
             headers: {
               'x-app-secret': AppConfig.appSecret,
+              'x-session-id': sessionId,
               'Content-Type': 'application/json',
             },
             body: jsonEncode({
@@ -95,6 +110,10 @@ class GroqService {
       throw NetworkException('নেটওয়ার্ক সংযোগে সমস্যা হয়েছে: $e');
     }
 
+    if (response.statusCode == 429) {
+      throw _handle429(response);
+    }
+
     if (response.statusCode != 200) {
       throw ApiException(
         _messageForStatus(response.statusCode),
@@ -111,6 +130,35 @@ class GroqService {
       );
     }
     return text;
+  }
+
+  ApiException _handle429(http.Response response) {
+    try {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      if (data['error'] == 'usage_limit_reached') {
+        final resetsAt = DateTime.parse(data['resets_at'] as String).toLocal();
+        return ApiException(
+          _usageLimitMessage(resetsAt),
+          statusCode: 429,
+          isUsageLimit: true,
+          resetsAt: resetsAt,
+        );
+      }
+    } catch (_) {}
+    return ApiException(_messageForStatus(429), statusCode: 429);
+  }
+
+  String _usageLimitMessage(DateTime resetsAt) {
+    final remaining = resetsAt.difference(DateTime.now());
+    if (remaining.isNegative) {
+      return 'আপনার এই দফার সীমা শেষ — এখনই আবার চেষ্টা করুন।';
+    }
+    final hours = remaining.inHours;
+    final minutes = remaining.inMinutes.remainder(60);
+    final timeStr = hours > 0
+        ? '$hours ঘণ্টা ${minutes > 0 ? '$minutes মিনিট ' : ''}পর'
+        : '$minutes মিনিট পর';
+    return 'আপনি এই দফায় যথেষ্ট কথা বলে ফেলেছেন। প্রায় $timeStr আবার কথা বলতে পারবেন।';
   }
 
   String _messageForStatus(int statusCode) {

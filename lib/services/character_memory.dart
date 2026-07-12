@@ -1,12 +1,3 @@
-/// Tracks a few durable facts about the user across the conversation —
-/// their name and recurring emotional tone — without resending the full
-/// chat history as "memory" on every request.
-///
-/// This is intentionally heuristic (regex/keyword based) rather than a
-/// second LLM call: it costs nothing, runs instantly, and is good enough
-/// to keep Marcus consistent (e.g. not re-asking a name he was already
-/// told, or opening with cheerful small talk right after the user shared
-/// something painful).
 class CharacterMemory {
   String? userName;
 
@@ -50,7 +41,6 @@ class CharacterMemory {
     });
   }
 
-  /// The most frequently signalled mood so far, if any.
   String? get dominantMood {
     if (_moodSignals.isEmpty) return null;
     final entries = _moodSignals.entries.toList()
@@ -58,9 +48,6 @@ class CharacterMemory {
     return entries.first.key;
   }
 
-  /// A short note appended to the system prompt so the model stays
-  /// consistent about who it's talking to and their recent emotional
-  /// tone, without needing the full history re-summarized.
   String buildBrief() {
     final parts = <String>[];
     if (userName != null) {

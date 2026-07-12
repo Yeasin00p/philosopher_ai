@@ -6,22 +6,14 @@ import 'prompt_builder.dart';
 
 export 'gorq_service.dart' show NetworkException, ApiException;
 
-/// High-level entry point the UI talks to. Wires together the persona
-/// prompt (MarcusPrompt), conversation state (ConversationManager +
-/// CharacterMemory), and the raw API client (GroqService) — none of
-/// which know about each other directly.
-///
-/// This replaces the old monolithic `GroqService` from the UI's point of
-/// view: same two calls (`sendMessage`, `getGreeting`), same lifecycle
-/// (`dispose`), but each concern now lives in its own testable file.
 class MarcusChatService {
   MarcusChatService({
     GroqService? groqService,
     ConversationManager? conversationManager,
     PromptBuilder? promptBuilder,
-  })  : _groq = groqService ?? GroqService(),
-        _conversation = conversationManager ?? ConversationManager(),
-        _promptBuilder = promptBuilder ?? const PromptBuilder();
+  }) : _groq = groqService ?? GroqService(),
+       _conversation = conversationManager ?? ConversationManager(),
+       _promptBuilder = promptBuilder ?? const PromptBuilder();
 
   final GroqService _groq;
   final ConversationManager _conversation;
@@ -30,8 +22,6 @@ class MarcusChatService {
   List<Map<String, String>> get history => _conversation.history;
   CharacterMemory get memory => _conversation.memory;
 
-  /// Asks the model for an opening line. Falls back to a static greeting
-  /// if the call fails, so the chat never opens on an error.
   Future<String> getGreeting() async {
     try {
       return await _requestReply(MarcusPrompt.greetingInstruction);
@@ -60,7 +50,6 @@ class MarcusChatService {
       _conversation.addAssistantMessage(reply);
       return reply;
     } catch (e) {
-      // Don't leave a user turn dangling with no reply in history.
       _conversation.removeLastUserMessageIfPresent();
       rethrow;
     }

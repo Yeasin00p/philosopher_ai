@@ -1,11 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:philosopher_ai/controllers/chat_controller.dart';
 import 'package:philosopher_ai/di/service_locator.dart';
-import 'package:philosopher_ai/screens/widget/chat_controller.dart';
 import 'package:philosopher_ai/services/chat_completion_service.dart';
 import 'package:philosopher_ai/services/conversation_manager.dart';
 import 'package:philosopher_ai/services/marcus_chat_service.dart';
 
-import '../../fakes/fake_chat_completion_service.dart';
+import '../../services/fakes/fake_chat_completion_service.dart';
+
 
 void main() {
     group('DI composition root (get_it)', () {

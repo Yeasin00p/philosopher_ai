@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:philosopher_ai/di/service_locator.dart';
 
+import '../controllers/chat_controller.dart';
 import '../theme/app_theme.dart';
+import '../widgets/chat_header.dart';
+import '../widgets/chat_input_bar.dart';
+import '../widgets/chat_loading_state.dart';
+import '../widgets/context_notice.dart';
 import '../widgets/message_bubble.dart';
+import '../widgets/retry_banner.dart';
 import '../widgets/typing_indicator.dart';
-import 'widget/chat_controller.dart';
-import 'widget/chat_header.dart';
-import 'widget/chat_input_bar.dart';
-import 'widget/chat_loading_state.dart';
-import 'widget/context_notice.dart';
-import 'widget/retry_banner.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -47,7 +47,6 @@ class _ChatScreenState extends State<ChatScreen>
     super.dispose();
   }
 
-  
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;

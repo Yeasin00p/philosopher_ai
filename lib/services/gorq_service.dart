@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:philosopher_ai/config.dart';
+import 'package:philosopher_ai/services/chat_completion_service.dart';
 import 'session_id_service.dart';
 
 class NetworkException implements Exception {
@@ -29,7 +30,7 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
-class GroqService {
+class GroqService implements ChatCompletionService {
   GroqService({http.Client? client}) : _client = client ?? http.Client();
 
   static const String _baseUrl = AppConfig.proxyUrl;
@@ -39,6 +40,7 @@ class GroqService {
 
   final http.Client _client;
 
+  @override
   Future<String> complete(
     List<Map<String, String>> messages, {
     double temperature = 1.1,
@@ -173,6 +175,7 @@ class GroqService {
     }
   }
 
+  @override
   void dispose() {
     _client.close();
   }

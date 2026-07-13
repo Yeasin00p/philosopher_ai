@@ -1,4 +1,5 @@
 import 'character_memory.dart';
+import 'chat_completion_service.dart';
 import 'conversation_manager.dart';
 import 'gorq_service.dart';
 import 'marcus_prompt.dart';
@@ -8,14 +9,15 @@ export 'gorq_service.dart' show NetworkException, ApiException;
 
 class MarcusChatService {
   MarcusChatService({
+    ChatCompletionService? chatService,
     GroqService? groqService,
     ConversationManager? conversationManager,
     PromptBuilder? promptBuilder,
-  }) : _groq = groqService ?? GroqService(),
+  }) : _chatService = chatService ?? GroqService(),
        _conversation = conversationManager ?? ConversationManager(),
        _promptBuilder = promptBuilder ?? const PromptBuilder();
 
-  final GroqService _groq;
+  final ChatCompletionService _chatService;
   final ConversationManager _conversation;
   final PromptBuilder _promptBuilder;
 
@@ -46,7 +48,7 @@ class MarcusChatService {
     );
 
     try {
-      final reply = await _groq.complete(messages);
+      final reply = await _chatService.complete(messages);
       _conversation.addAssistantMessage(reply);
       return reply;
     } catch (e) {
@@ -57,5 +59,5 @@ class MarcusChatService {
 
   void clearHistory() => _conversation.clear();
 
-  void dispose() => _groq.dispose();
+  void dispose() => _chatService.dispose();
 }

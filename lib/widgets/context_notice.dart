@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:philosopher_ai/constants/app_strings.dart';
 
 import '../../theme/app_theme.dart';
 
@@ -27,7 +28,7 @@ class ContextNotice extends StatelessWidget {
           const SizedBox(width: 8),
           Flexible(
             child: Text(
-              'এর আগের অংশ মার্কাস আর মনে রাখছেন না — শুধু সাম্প্রতিক কথোপকথনের ভিত্তিতে উত্তর দিচ্ছেন।',
+              AppStrings.contextNoticeText,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 color: AppColors.parchment.withValues(alpha: 0.6),

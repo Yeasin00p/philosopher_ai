@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:philosopher_ai/constants/app_strings.dart';
 
 import '../../theme/app_theme.dart';
 
@@ -76,7 +77,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
               minLines: 1,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
-                hintText: 'Speak your mind...',
+                hintText: AppStrings.chatInputHint,
                 hintStyle: GoogleFonts.inter(
                   color: AppColors.parchment.withValues(alpha: 0.45),
                   fontSize: 14,

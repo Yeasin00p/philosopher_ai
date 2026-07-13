@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:philosopher_ai/constants/app_strings.dart';
 
 import '../../theme/app_theme.dart';
 
@@ -24,7 +25,7 @@ class RetryBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'বার্তাটি পাঠানো যায়নি।',
+              AppStrings.retryFailedMessage,
               style: GoogleFonts.inter(
                 color: AppColors.parchment.withValues(alpha: 0.75),
                 fontSize: 12.5,
@@ -34,7 +35,7 @@ class RetryBanner extends StatelessWidget {
           GestureDetector(
             onTap: onRetry,
             child: Text(
-              'আবার চেষ্টা করুন',
+              AppStrings.retryButtonLabel,
               style: GoogleFonts.inter(
                 color: AppColors.gold,
                 fontSize: 12.5,

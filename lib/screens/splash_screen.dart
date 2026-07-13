@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:philosopher_ai/constants/app_strings.dart';
 import '../theme/app_theme.dart';
 import 'onboarding_screen.dart';
 
@@ -136,7 +137,7 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Transform.translate(
                         offset: Offset(0, 12 * (1 - _fadeIn.value)),
                         child: Text(
-                          'MARCUS\nAURELIUS',
+                          AppStrings.splashTitle,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.playfairDisplay(
                             color: AppColors.cream,
@@ -165,7 +166,7 @@ class _SplashScreenState extends State<SplashScreen>
                     Opacity(
                       opacity: _taglineFade.value,
                       child: Text(
-                        'WISDOM THROUGH DIALOGUE',
+                        AppStrings.splashTagline,
                         style: GoogleFonts.inter(
                           color: AppColors.parchment,
                           fontSize: 11,

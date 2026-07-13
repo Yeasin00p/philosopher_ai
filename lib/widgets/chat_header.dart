@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:philosopher_ai/constants/app_strings.dart';
 import 'package:philosopher_ai/widgets/philosopher_avatar.dart';
 
 import '../../theme/app_theme.dart';
@@ -39,7 +40,7 @@ class ChatHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Marcus Aurelius',
+                    AppStrings.chatHeaderName,
                     style: GoogleFonts.playfairDisplay(
                       color: AppColors.cream,
                       fontSize: 18,
@@ -59,7 +60,7 @@ class ChatHeader extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Ready to converse',
+                        AppStrings.chatHeaderStatusReady,
                         style: GoogleFonts.inter(
                           color: AppColors.parchment.withValues(alpha: 0.7),
                           fontSize: 12,

@@ -1,3 +1,5 @@
+import 'package:philosopher_ai/constants/app_strings.dart';
+
 import 'character_memory.dart';
 import 'chat_completion_service.dart';
 import 'conversation_manager.dart';
@@ -37,7 +39,7 @@ class MarcusChatService {
   Future<String> sendMessage(String userMessage) {
     final trimmed = userMessage.trim();
     if (trimmed.isEmpty) {
-      throw ApiException('বার্তা খালি রাখা যাবে না।');
+      throw ApiException(AppStrings.emptyMessageError);
     }
     return _requestReply(trimmed);
   }

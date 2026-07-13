@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:philosopher_ai/screens/widget/context_notice.dart';
+import 'package:philosopher_ai/widgets/context_notice.dart';
 
 void main() {
   testWidgets('ContextNotice বার্তা প্রদর্শন করে', (tester) async {

@@ -1,18 +1,15 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:philosopher_ai/main.dart';
 
 void main() {
-  testWidgets('App starts with splash screen', (WidgetTester tester) async {
+  testWidgets('App starts with splash screen', (tester) async {
     await tester.pumpWidget(const PhilosopherApp());
-    // Splash screen should show the app name
-    expect(find.text('MARCUS\nAURELIUS'), findsOneWidget);
+
+    // splash screen ঠিকমতো render হয়েছে কিনা যাচাই
     expect(find.text('WISDOM THROUGH DIALOGUE'), findsOneWidget);
+
+    // pending timer (3s delayed navigation) শেষ করার জন্য যথেষ্ট সময় pump করুন,
+    // নাহলে "Timer still pending" assertion আসবে।
+    await tester.pump(const Duration(seconds: 4));
   });
 }

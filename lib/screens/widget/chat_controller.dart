@@ -9,6 +9,8 @@ class ChatController extends ChangeNotifier {
 
   final MarcusChatService _service;
 
+  static const int _uiMessageCap = 200;
+
   final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
 
@@ -20,6 +22,8 @@ class ChatController extends ChangeNotifier {
 
   String? _lastFailedText;
   bool get hasFailedMessage => _lastFailedText != null;
+
+  int get outOfContextCount => _service.contextDroppedCount;
 
   Future<void> loadGreeting() async {
     _isTyping = true;
@@ -62,6 +66,7 @@ class ChatController extends ChangeNotifier {
       );
     } finally {
       _isTyping = false;
+      _enforceUiCap();
       notifyListeners();
     }
   }
@@ -74,6 +79,12 @@ class ChatController extends ChangeNotifier {
   String _friendlyError(Object e) {
     if (e is NetworkException || e is ApiException) return e.toString();
     return MarcusPrompt.genericFailure;
+  }
+
+  void _enforceUiCap() {
+    if (_messages.length > _uiMessageCap) {
+      _messages.removeRange(0, _messages.length - _uiMessageCap);
+    }
   }
 
   @override

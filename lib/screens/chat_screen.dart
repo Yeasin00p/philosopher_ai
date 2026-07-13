@@ -7,6 +7,7 @@ import 'widget/chat_controller.dart';
 import 'widget/chat_header.dart';
 import 'widget/chat_input_bar.dart';
 import 'widget/chat_loading_state.dart';
+import 'widget/context_notice.dart';
 import 'widget/retry_banner.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -71,15 +72,27 @@ class _ChatScreenState extends State<ChatScreen>
               listenable: _chat,
               builder: (context, _) {
                 if (_chat.isLoading) return const ChatLoadingState();
+
                 final messages = _chat.messages;
-                final itemCount = messages.length + (_chat.isTyping ? 1 : 0);
+                final showContextNotice = _chat.outOfContextCount > 0;
+                final itemCount = (showContextNotice ? 1 : 0) +
+                    messages.length +
+                    (_chat.isTyping ? 1 : 0);
+
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.only(top: 20, bottom: 8),
                   itemCount: itemCount,
                   itemBuilder: (context, i) {
-                    if (i < messages.length) {
-                      final message = messages[i];
+                    var index = i;
+
+                    if (showContextNotice) {
+                      if (index == 0) return const ContextNotice();
+                      index -= 1;
+                    }
+
+                    if (index < messages.length) {
+                      final message = messages[index];
                       return MessageBubble(
                         key: ValueKey(message.timestamp.microsecondsSinceEpoch),
                         message: message,

@@ -5,7 +5,11 @@ class ConversationManager {
 
   final int _maxMessages;
   final List<Map<String, String>> _history = [];
+
   final CharacterMemory memory = CharacterMemory();
+
+  int _droppedCount = 0;
+  int get droppedCount => _droppedCount;
 
   List<Map<String, String>> get history => List.unmodifiable(_history);
 
@@ -28,12 +32,15 @@ class ConversationManager {
 
   void _trim() {
     if (_history.length > _maxMessages) {
-      _history.removeRange(0, _history.length - _maxMessages);
+      final excess = _history.length - _maxMessages;
+      _history.removeRange(0, excess);
+      _droppedCount += excess;
     }
   }
 
   void clear() {
     _history.clear();
     memory.clear();
+    _droppedCount = 0;
   }
 }

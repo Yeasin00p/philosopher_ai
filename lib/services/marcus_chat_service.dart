@@ -24,6 +24,8 @@ class MarcusChatService {
   List<Map<String, String>> get history => _conversation.history;
   CharacterMemory get memory => _conversation.memory;
 
+  int get contextDroppedCount => _conversation.droppedCount;
+
   Future<String> getGreeting() async {
     try {
       return await _requestReply(MarcusPrompt.greetingInstruction);
@@ -46,7 +48,6 @@ class MarcusChatService {
       history: _conversation.history,
       memory: _conversation.memory,
     );
-
     try {
       final reply = await _chatService.complete(messages);
       _conversation.addAssistantMessage(reply);

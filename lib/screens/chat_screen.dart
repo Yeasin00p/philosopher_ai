@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:philosopher_ai/di/service_locator.dart';
 
 import '../theme/app_theme.dart';
 import '../widgets/message_bubble.dart';
@@ -29,7 +30,7 @@ class _ChatScreenState extends State<ChatScreen>
   @override
   void initState() {
     super.initState();
-    _chat = ChatController()..addListener(_scrollToBottom);
+    _chat = getIt<ChatController>()..addListener(_scrollToBottom);
     _headerFade = AnimationController(
       vsync: this,
       duration: _headerFadeDuration,
@@ -46,8 +47,7 @@ class _ChatScreenState extends State<ChatScreen>
     super.dispose();
   }
 
-  /// Runs after every controller change (new message, typing indicator
-  /// toggled). A no-op if there's nothing to scroll to yet.
+  
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
@@ -75,7 +75,8 @@ class _ChatScreenState extends State<ChatScreen>
 
                 final messages = _chat.messages;
                 final showContextNotice = _chat.outOfContextCount > 0;
-                final itemCount = (showContextNotice ? 1 : 0) +
+                final itemCount =
+                    (showContextNotice ? 1 : 0) +
                     messages.length +
                     (_chat.isTyping ? 1 : 0);
 

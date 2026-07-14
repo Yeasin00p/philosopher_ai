@@ -2,8 +2,8 @@ import 'package:get_it/get_it.dart';
 
 import '../controllers/chat_controller.dart';
 import '../services/chat_completion_service.dart';
-import '../services/gorq_service.dart';
 import '../services/conversation_manager.dart';
+import '../services/groq_service.dart';
 import '../services/prompt_builder.dart';
 import '../services/marcus_chat_service.dart';
 

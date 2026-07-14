@@ -3,11 +3,10 @@ import 'package:philosopher_ai/constants/app_strings.dart';
 import 'character_memory.dart';
 import 'chat_completion_service.dart';
 import 'conversation_manager.dart';
-import 'gorq_service.dart';
+import 'groq_service.dart';
 import 'marcus_prompt.dart';
 import 'prompt_builder.dart';
 
-export 'gorq_service.dart' show NetworkException, ApiException;
 
 class MarcusChatService {
   MarcusChatService({

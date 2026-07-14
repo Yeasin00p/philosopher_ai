@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:philosopher_ai/services/groq_service.dart';
 import 'package:philosopher_ai/services/marcus_chat_service.dart';
 
 import 'fakes/fake_chat_completion_service.dart';

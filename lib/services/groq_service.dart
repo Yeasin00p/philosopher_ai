@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:philosopher_ai/config.dart';
 import 'package:philosopher_ai/services/chat_completion_service.dart';
+import 'retry_policy.dart';
 import 'session_id_service.dart';
 
 class NetworkException implements Exception {
@@ -31,14 +31,16 @@ class ApiException implements Exception {
 }
 
 class GroqService implements ChatCompletionService {
-  GroqService({http.Client? client}) : _client = client ?? http.Client();
+  GroqService({http.Client? client, RetryPolicy? retryPolicy})
+    : _client = client ?? http.Client(),
+      _retryPolicy = retryPolicy ?? const RetryPolicy();
 
   static const String _baseUrl = AppConfig.proxyUrl;
   static const String _model = 'llama-3.3-70b-versatile';
   static const Duration _requestTimeout = Duration(seconds: 30);
-  static const int _maxRetries = 2;
 
   final http.Client _client;
+  final RetryPolicy _retryPolicy;
 
   @override
   Future<String> complete(
@@ -47,32 +49,23 @@ class GroqService implements ChatCompletionService {
     double topP = 0.92,
     int maxTokens = 1024,
   }) {
-    return _withRetry(
+    return _retryPolicy.execute(
       () => _call(
         messages,
         temperature: temperature,
         topP: topP,
         maxTokens: maxTokens,
       ),
+      isRetryable: _isRetryable,
     );
   }
 
-  Future<String> _withRetry(Future<String> Function() attempt) async {
-    var tries = 0;
-    while (true) {
-      try {
-        return await attempt();
-      } on ApiException catch (e) {
-        final retryable =
-            !e.isUsageLimit &&
-            (e.statusCode == 429 || (e.statusCode ?? 0) >= 500);
-        if (!retryable || tries >= _maxRetries) rethrow;
-      } on NetworkException {
-        if (tries >= _maxRetries) rethrow;
-      }
-      tries++;
-      await Future.delayed(Duration(milliseconds: 600 * pow(2, tries).toInt()));
+  bool _isRetryable(Object e) {
+    if (e is ApiException) {
+      return !e.isUsageLimit &&
+          (e.statusCode == 429 || (e.statusCode ?? 0) >= 500);
     }
+    return e is NetworkException;
   }
 
   Future<String> _call(

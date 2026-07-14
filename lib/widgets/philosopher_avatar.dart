@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_assets.dart';
 import '../theme/app_theme.dart';
 
 class PhilosopherAvatar extends StatefulWidget {
@@ -53,7 +54,7 @@ class _PhilosopherAvatarState extends State<PhilosopherAvatar>
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.gold.withValues(alpha: 0.6), width: 1.5),
               image: const DecorationImage(
-                image: AssetImage('assets/images/marcus_aurelius.jpg'),
+                image: AssetImage(AppAssets.marcusPortrait),
                 fit: BoxFit.cover,
               ),
               boxShadow: [

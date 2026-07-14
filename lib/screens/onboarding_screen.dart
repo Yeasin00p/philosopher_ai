@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:philosopher_ai/constants/app_strings.dart';
+import '../constants/app_assets.dart';
 import '../theme/app_theme.dart';
 import 'chat_screen.dart';
 
@@ -183,7 +184,7 @@ class _IntroPage1 extends StatelessWidget {
                 ),
               ],
               image: const DecorationImage(
-                image: AssetImage('assets/images/marcus_aurelius.jpg'),
+                image: AssetImage(AppAssets.marcusPortrait),
                 fit: BoxFit.cover,
               ),
             ),

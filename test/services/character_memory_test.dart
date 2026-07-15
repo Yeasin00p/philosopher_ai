@@ -2,60 +2,116 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:philosopher_ai/services/character_memory.dart';
 
 void main() {
-  group('CharacterMemory mood windowing', () {
-    test('dominant mood follows a short streak before the window fills', () {
-      final memory = CharacterMemory(moodWindowSize: 4);
+  group('CharacterMemory', () {
+    group('name detection', () {
+      test('detects name from "আমার নাম X" pattern', () {
+        final memory = CharacterMemory();
 
-      memory.observeUserMessage('আমার খুব দুঃখ লাগছে আজ');
-      memory.observeUserMessage('মন খারাপ, একা লাগছে');
+        memory.observeUserMessage('আমার নাম আরিফ');
 
-      expect(memory.dominantMood, 'দুঃখ');
+        expect(memory.userName, 'আরিফ');
+      });
+
+      test('detects name from "আমি X বলছি" pattern', () {
+        final memory = CharacterMemory();
+
+        memory.observeUserMessage('আমি সাকিব বলছি');
+
+        expect(memory.userName, 'সাকিব');
+      });
+
+      test('does not overwrite a previously detected name', () {
+        final memory = CharacterMemory();
+
+        memory.observeUserMessage('আমার নাম আরিফ');
+        memory.observeUserMessage('আমার নাম রহিম');
+
+        expect(memory.userName, 'আরিফ');
+      });
+
+      test('leaves userName null when no pattern matches', () {
+        final memory = CharacterMemory();
+
+        memory.observeUserMessage('আজকে আবহাওয়া কেমন?');
+
+        expect(memory.userName, isNull);
+      });
     });
 
-    test('older mood is displaced once enough newer messages arrive', () {
-      final memory = CharacterMemory(moodWindowSize: 4);
+    group('mood detection', () {
+      test('detects sadness ("দুঃখ") from keyword match', () {
+        final memory = CharacterMemory();
 
-      memory.observeUserMessage('আমার খুব দুঃখ লাগছে আজ');
-      memory.observeUserMessage('মন খারাপ, একা লাগছে');
+        memory.observeUserMessage('আজ আমার মন খারাপ');
 
-      memory.observeUserMessage('আজ আমি খুব খুশি');
-      memory.observeUserMessage('সত্যিই আনন্দ লাগছে');
-      memory.observeUserMessage('ভালো লাগছে এখন');
+        expect(memory.dominantMood, 'দুঃখ');
+      });
 
-      expect(memory.dominantMood, 'আনন্দ');
+      test('detects anxiety ("উদ্বেগ") from keyword match', () {
+        final memory = CharacterMemory();
+
+        memory.observeUserMessage('আমি খুব চিন্তিত এই বিষয়ে');
+
+        expect(memory.dominantMood, 'উদ্বেগ');
+      });
+
+      test('dominantMood is null when nothing has been observed', () {
+        final memory = CharacterMemory();
+
+        expect(memory.dominantMood, isNull);
+      });
+
+      test('dominantMood reflects the most frequently signalled mood', () {
+        final memory = CharacterMemory();
+
+        memory.observeUserMessage('মন খারাপ লাগছে');
+        memory.observeUserMessage('আজ ভীষণ একা লাগছে');
+        memory.observeUserMessage('একটু চিন্তিত অবশ্য');
+
+        // দুঃখ signalled twice ("মন খারাপ", "একা"), উদ্বেগ once ("চিন্তিত").
+        expect(memory.dominantMood, 'দুঃখ');
+      });
     });
 
-    test('buildBrief reflects the shifted mood in Bangla', () {
-      final memory = CharacterMemory(moodWindowSize: 3);
+    group('buildBrief', () {
+      test('returns empty string when nothing is known', () {
+        final memory = CharacterMemory();
 
-      memory.observeUserMessage('আমার নাম রাহাত');
-      memory.observeUserMessage('খুব রাগ হচ্ছে');
-      memory.observeUserMessage('এখন খুশি লাগছে');
-      memory.observeUserMessage('আনন্দ লাগছে আজ');
+        expect(memory.buildBrief(), isEmpty);
+      });
 
-      final brief = memory.buildBrief();
-      expect(brief, contains('ব্যবহারকারীর নাম: রাহাত'));
-      expect(brief, contains('প্রধান অনুভূতির ধরন: আনন্দ'));
+      test('includes only the name when mood is unknown', () {
+        final memory = CharacterMemory();
+        memory.observeUserMessage('আমার নাম আরিফ');
+
+        final brief = memory.buildBrief();
+
+        expect(brief, contains('আরিফ'));
+        expect(brief, isNot(contains('অনুভূতি')));
+      });
+
+      test('includes both name and mood when both are known', () {
+        final memory = CharacterMemory();
+        memory.observeUserMessage('আমার নাম আরিফ, মন খারাপ লাগছে');
+
+        final brief = memory.buildBrief();
+
+        expect(brief, contains('আরিফ'));
+        expect(brief, contains('দুঃখ'));
+      });
     });
-    test('clear resets both name and the mood window', () {
-      final memory = CharacterMemory();
 
-      memory.observeUserMessage('আমার নাম সাদিয়া');
-      memory.observeUserMessage('আমার রাগ হচ্ছে');
+    group('clear', () {
+      test('resets name and mood signals', () {
+        final memory = CharacterMemory();
+        memory.observeUserMessage('আমার নাম আরিফ, মন খারাপ লাগছে');
 
-      memory.clear();
+        memory.clear();
 
-      expect(memory.userName, isNull);
-      expect(memory.dominantMood, isNull);
-    });
-
-    test('a message with no keyword match does not affect dominant mood', () {
-      final memory = CharacterMemory(moodWindowSize: 3);
-
-      memory.observeUserMessage('আজ আমি খুশি');
-      memory.observeUserMessage('আজকের আবহাওয়া কেমন?');
-
-      expect(memory.dominantMood, 'আনন্দ');
+        expect(memory.userName, isNull);
+        expect(memory.dominantMood, isNull);
+        expect(memory.buildBrief(), isEmpty);
+      });
     });
   });
 }

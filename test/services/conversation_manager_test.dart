@@ -2,66 +2,122 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:philosopher_ai/services/conversation_manager.dart';
 
 void main() {
-  late ConversationManager manager;
+  group('ConversationManager', () {
+    test('addUserMessage appends a user-role entry', () {
+      final manager = ConversationManager();
 
-  setUp(() {
-    manager = ConversationManager(maxTurns: 2); // maxMessages = 4
-  });
+      manager.addUserMessage('হ্যালো');
 
-  test('maxTurns এর মধ্যে থাকলে droppedCount শূন্য থাকে', () {
-    manager.addUserMessage('প্রশ্ন ১');
-    manager.addAssistantMessage('উত্তর ১');
-    manager.addUserMessage('প্রশ্ন ২');
-    manager.addAssistantMessage('উত্তর ২');
+      expect(manager.history.length, 1);
+      expect(manager.history.first['role'], 'user');
+      expect(manager.history.first['content'], 'হ্যালো');
+    });
 
-    expect(manager.history.length, 4);
-    expect(manager.droppedCount, 0);
-  });
+    test('addAssistantMessage appends an assistant-role entry', () {
+      final manager = ConversationManager();
 
-  test('maxTurns ছাড়িয়ে গেলে পুরনো turn trim হয় এবং droppedCount বাড়ে', () {
-    manager.addUserMessage('প্রশ্ন ১');
-    manager.addAssistantMessage('উত্তর ১');
-    manager.addUserMessage('প্রশ্ন ২');
-    manager.addAssistantMessage('উত্তর ২');
-    manager.addUserMessage('প্রশ্ন ৩');
-    manager.addAssistantMessage('উত্তর ৩');
+      manager.addUserMessage('প্রশ্ন');
+      manager.addAssistantMessage('উত্তর');
 
-    expect(manager.history.length, 4);
-    expect(manager.history.first['content'], 'প্রশ্ন ২');
-    expect(manager.droppedCount, 2);
-  });
+      expect(manager.history.length, 2);
+      expect(manager.history.last['role'], 'assistant');
+      expect(manager.history.last['content'], 'উত্তর');
+    });
 
-  test('একাধিকবার trim হলে droppedCount cumulative ভাবে বাড়ে', () {
-    for (var i = 1; i <= 6; i++) {
-      manager.addUserMessage('প্রশ্ন $i');
-      manager.addAssistantMessage('উত্তর $i');
-    }
+    test('addUserMessage feeds CharacterMemory.observeUserMessage', () {
+      final manager = ConversationManager();
 
-    expect(manager.history.length, 4);
-    expect(manager.droppedCount, 8);
-  });
+      manager.addUserMessage('আমার নাম আরিফ');
 
-  test('clear() করলে droppedCount রিসেট হয়', () {
-    manager.addUserMessage('প্রশ্ন ১');
-    manager.addAssistantMessage('উত্তর ১');
-    manager.addUserMessage('প্রশ্ন ২');
-    manager.addAssistantMessage('উত্তর ২');
-    manager.addUserMessage('প্রশ্ন ৩');
-    manager.addAssistantMessage('উত্তর ৩');
+      expect(manager.memory.userName, 'আরিফ');
+    });
 
-    expect(manager.droppedCount, greaterThan(0));
+    test('history exposes an unmodifiable list', () {
+      final manager = ConversationManager();
+      manager.addUserMessage('হ্যালো');
 
-    manager.clear();
+      expect(() => manager.history.add({'role': 'user', 'content': 'x'}),
+          throwsUnsupportedError);
+    });
 
-    expect(manager.droppedCount, 0);
-    expect(manager.history, isEmpty);
-  });
+    group('trimming', () {
+      test('keeps history at or below maxTurns * 2 messages', () {
+        // maxTurns: 2 -> _maxMessages = 4
+        final manager = ConversationManager(maxTurns: 2);
 
-  test('removeLastUserMessageIfPresent() droppedCount বদলায় না', () {
-    manager.addUserMessage('প্রশ্ন ১');
-    manager.removeLastUserMessageIfPresent();
+        for (var i = 0; i < 5; i++) {
+          manager.addUserMessage('user-$i');
+          manager.addAssistantMessage('assistant-$i');
+        }
 
-    expect(manager.history, isEmpty);
-    expect(manager.droppedCount, 0);
+        // 5 user + 5 assistant = 10 raw additions, capped at 4.
+        expect(manager.history.length, 4);
+      });
+
+      test('trims from the oldest messages (FIFO)', () {
+        final manager = ConversationManager(maxTurns: 1); // _maxMessages = 2
+
+        manager.addUserMessage('turn-1-user');
+        manager.addAssistantMessage('turn-1-assistant');
+        manager.addUserMessage('turn-2-user');
+        manager.addAssistantMessage('turn-2-assistant');
+
+        expect(manager.history.length, 2);
+        expect(manager.history.first['content'], 'turn-2-user');
+        expect(manager.history.last['content'], 'turn-2-assistant');
+      });
+
+      test('does not trim when under the cap', () {
+        final manager = ConversationManager(maxTurns: 12); // _maxMessages = 24
+
+        manager.addUserMessage('হ্যালো');
+        manager.addAssistantMessage('স্বাগতম');
+
+        expect(manager.history.length, 2);
+      });
+    });
+
+    group('removeLastUserMessageIfPresent', () {
+      test('removes the last entry when it is a user message', () {
+        final manager = ConversationManager();
+        manager.addUserMessage('প্রশ্ন যেটার জবাব আসেনি');
+
+        manager.removeLastUserMessageIfPresent();
+
+        expect(manager.history, isEmpty);
+      });
+
+      test('is a no-op when the last entry is an assistant message', () {
+        final manager = ConversationManager();
+        manager.addUserMessage('প্রশ্ন');
+        manager.addAssistantMessage('উত্তর');
+
+        manager.removeLastUserMessageIfPresent();
+
+        expect(manager.history.length, 2);
+        expect(manager.history.last['role'], 'assistant');
+      });
+
+      test('is a no-op when history is empty', () {
+        final manager = ConversationManager();
+
+        expect(() => manager.removeLastUserMessageIfPresent(), returnsNormally);
+        expect(manager.history, isEmpty);
+      });
+    });
+
+    group('clear', () {
+      test('empties history and resets memory', () {
+        final manager = ConversationManager();
+        manager.addUserMessage('আমার নাম আরিফ, মন খারাপ লাগছে');
+        manager.addAssistantMessage('উত্তর');
+
+        manager.clear();
+
+        expect(manager.history, isEmpty);
+        expect(manager.memory.userName, isNull);
+        expect(manager.memory.dominantMood, isNull);
+      });
+    });
   });
 }

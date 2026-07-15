@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:philosopher_ai/constants/app_strings.dart';
+import 'package:philosopher_ai/router/app_routes.dart';
 import '../constants/app_assets.dart';
 import '../theme/app_theme.dart';
-import 'chat_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -17,15 +18,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentPage = 0;
 
   void _goToChat() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const ChatScreen(),
-        transitionsBuilder: (context, anim, secondaryAnimation, child) =>
-            FadeTransition(opacity: anim, child: child),
-        transitionDuration: const Duration(milliseconds: 600),
-      ),
-    );
+   context.go(AppRoutes.chat);
   }
 
   @override

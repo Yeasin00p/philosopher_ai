@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:philosopher_ai/constants/app_strings.dart';
+import '../router/app_routes.dart';
 import '../theme/app_theme.dart';
-import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -56,14 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
     // Navigate after 3 seconds
     Future.delayed(const Duration(milliseconds: 3000), () {
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const OnboardingScreen(),
-            transitionsBuilder: (context, anim, secondaryAnimation, child) =>
-                FadeTransition(opacity: anim, child: child),
-            transitionDuration: const Duration(milliseconds: 800),
-          ),
-        );
+        context.go(AppRoutes.onboarding);
       }
     });
   }
@@ -92,8 +86,12 @@ class _SplashScreenState extends State<SplashScreen>
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        AppColors.gold.withValues(alpha: _glowAnim.value * 0.35),
-                        AppColors.gold.withValues(alpha: _glowAnim.value * 0.08),
+                        AppColors.gold.withValues(
+                          alpha: _glowAnim.value * 0.35,
+                        ),
+                        AppColors.gold.withValues(
+                          alpha: _glowAnim.value * 0.08,
+                        ),
                         Colors.transparent,
                       ],
                       stops: const [0.0, 0.4, 1.0],
@@ -123,7 +121,9 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                           child: Icon(
                             Icons.auto_stories_rounded,
-                            color: AppColors.gold.withValues(alpha: _fadeIn.value),
+                            color: AppColors.gold.withValues(
+                              alpha: _fadeIn.value,
+                            ),
                             size: 36,
                           ),
                         ),

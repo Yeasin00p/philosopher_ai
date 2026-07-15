@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:philosopher_ai/router/app_router.dart';
 import 'di/service_locator.dart';
 import 'theme/app_theme.dart';
-import 'screens/splash_screen.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,11 +25,11 @@ class PhilosopherApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Marcus Aurelius — AI Philosopher',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
-      home: const SplashScreen(),
+      routerConfig: AppRouter.router,
     );
   }
 }

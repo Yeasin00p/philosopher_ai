@@ -19,7 +19,7 @@ void main() {
     {'role': 'user', 'content': 'হ্যালো'},
   ];
 
-  http.Response _chatResponse(String content) => http.Response(
+  http.Response chatResponse(String content) => http.Response(
         jsonEncode({
           'choices': [
             {
@@ -35,7 +35,7 @@ void main() {
     test('returns the model reply on a successful call', () async {
       final service = GroqService(
         client: MockClient((request) async {
-          return _chatResponse('স্বাগতম, বন্ধু।');
+          return chatResponse('স্বাগতম, বন্ধু।');
         }),
       );
 
@@ -46,7 +46,7 @@ void main() {
 
     test('throws ApiException when the reply content is empty', () async {
       final service = GroqService(
-        client: MockClient((request) async => _chatResponse('')),
+        client: MockClient((request) async => chatResponse('')),
       );
 
       expect(
@@ -153,7 +153,7 @@ void main() {
           if (callCount == 1) {
             return http.Response('{"error":"server_error"}', 503);
           }
-          return _chatResponse('এবার উত্তর এলো।');
+          return chatResponse('এবার উত্তর এলো।');
         }),
       );
 

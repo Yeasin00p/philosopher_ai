@@ -1,7 +1,14 @@
+import 'dart:collection';
+
 class CharacterMemory {
+  CharacterMemory({this.moodWindowSize = 10})
+    : assert(moodWindowSize > 0, 'moodWindowSize must be positive');
+
   String? userName;
 
-  final Map<String, int> _moodSignals = {};
+  final int moodWindowSize;
+
+  final Queue<List<String>> _moodWindow = Queue<List<String>>();
 
   static final List<RegExp> _namePatterns = [
     RegExp(r'আমার নাম\s+([^\s,।.!?]+)'),
@@ -15,14 +22,13 @@ class CharacterMemory {
     'আনন্দ': ['খুশি', 'আনন্দ', 'ভালো লাগছে'],
   };
 
-  /// Call once per incoming user message.
   void observeUserMessage(String text) {
     _detectName(text);
     _detectMood(text);
   }
 
   void _detectName(String text) {
-    if (userName != null) return; // don't overwrite once known
+    if (userName != null) return;
     for (final pattern in _namePatterns) {
       final match = pattern.firstMatch(text);
       final name = match?.group(1);
@@ -34,16 +40,26 @@ class CharacterMemory {
   }
 
   void _detectMood(String text) {
-    _moodKeywords.forEach((mood, keywords) {
-      if (keywords.any(text.contains)) {
-        _moodSignals[mood] = (_moodSignals[mood] ?? 0) + 1;
-      }
-    });
+    final matched = <String>[
+      for (final entry in _moodKeywords.entries)
+        if (entry.value.any(text.contains)) entry.key,
+    ];
+
+    _moodWindow.addLast(matched);
+    if (_moodWindow.length > moodWindowSize) {
+      _moodWindow.removeFirst();
+    }
   }
 
   String? get dominantMood {
-    if (_moodSignals.isEmpty) return null;
-    final entries = _moodSignals.entries.toList()
+    final counts = <String, int>{};
+    for (final moods in _moodWindow) {
+      for (final mood in moods) {
+        counts[mood] = (counts[mood] ?? 0) + 1;
+      }
+    }
+    if (counts.isEmpty) return null;
+    final entries = counts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     return entries.first.key;
   }
@@ -61,6 +77,6 @@ class CharacterMemory {
 
   void clear() {
     userName = null;
-    _moodSignals.clear();
+    _moodWindow.clear();
   }
 }

@@ -6,7 +6,7 @@ import 'conversation_manager.dart';
 import 'groq_service.dart';
 import 'marcus_prompt.dart';
 import 'prompt_builder.dart';
-
+import 'user_facing_exception.dart';
 
 class MarcusChatService {
   MarcusChatService({
@@ -55,7 +55,9 @@ class MarcusChatService {
       return reply;
     } catch (e) {
       _conversation.removeLastUserMessageIfPresent();
-      rethrow;
+
+      if (e is UserFacingException) rethrow;
+      throw ApiException(MarcusPrompt.genericFailure);
     }
   }
 

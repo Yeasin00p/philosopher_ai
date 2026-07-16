@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../../models/chat_message.dart';
 import '../../services/marcus_chat_service.dart';
 import '../../services/marcus_prompt.dart';
-import '../services/groq_service.dart';
+import '../services/user_facing_exception.dart';
 
 class ChatController extends ChangeNotifier {
   ChatController({MarcusChatService? service})
@@ -78,7 +78,7 @@ class ChatController extends ChangeNotifier {
   }
 
   String _friendlyError(Object e) {
-    if (e is NetworkException || e is ApiException) return e.toString();
+    if (e is UserFacingException) return e.userMessage;
     return MarcusPrompt.genericFailure;
   }
 

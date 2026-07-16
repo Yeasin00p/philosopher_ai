@@ -3,17 +3,22 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:philosopher_ai/config.dart';
 import 'package:philosopher_ai/services/chat_completion_service.dart';
+import 'package:philosopher_ai/services/user_facing_exception.dart';
 import 'retry_policy.dart';
 import 'session_id_service.dart';
 
-class NetworkException implements Exception {
+class NetworkException implements Exception, UserFacingException {
   final String message;
   NetworkException(this.message);
+
+  @override
+  String get userMessage => message;
+
   @override
   String toString() => message;
 }
 
-class ApiException implements Exception {
+class ApiException implements Exception, UserFacingException {
   final String message;
   final int? statusCode;
   final bool isUsageLimit;
@@ -25,6 +30,9 @@ class ApiException implements Exception {
     this.isUsageLimit = false,
     this.resetsAt,
   });
+
+  @override
+  String get userMessage => message;
 
   @override
   String toString() => message;
